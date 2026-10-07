@@ -28,7 +28,7 @@ Before introducing held-out capability testing, the primary 12 development scena
 - **Result**: **36 / 36 passed (100.0%)**
 
 > **Important Notes on Benchmark Scope & Provenance**:
-> 1. The pre-change development suite completed 36/36 trials on `openai/gpt-oss-120b`. This run was completed prior to the implementation of automated cryptographic metadata stamping (added in commit `082011aad3ff7d34dad8beb67e2c832da54560ae`), so its JSON metadata contains `git_commit: null` and `system_prompt_sha256: null`.
+> 1. The pre-change development suite completed 36/36 trials on `openai/gpt-oss-120b`. This run was completed prior to the implementation of automated cryptographic metadata stamping (added during the prompt experiment iteration), so its JSON metadata contains `git_commit: null` and `system_prompt_sha256: null`.
 > 2. This 36/36 run predates grader v2 refinements and dynamic ID resolution, and was not repeated on 120b due to Groq daily token rate limits.
 
 ### Development Scenarios Summary
@@ -85,14 +85,14 @@ Re-evaluating the baseline agent under the tightened grader produced:
 
 To address capability-boundary honesty without baking benchmark-specific heuristics into the prompt, a general prompt enhancement was tested:
 
-- **Experiment Git Commit**: `082011aad3ff7d34dad8beb67e2c832da54560ae`
+- **Experiment Iteration**: Evaluated during an earlier internal authoring iteration (internal development commit `082011aad3ff7d34dad8beb67e2c832da54560ae`, not part of the submitted repository history).
 - **Experiment Prompt SHA-256**: `76e94f59cedc261958b68051b9dc7e0f910771992b638cd0bc74e7fb361e88b1`
 - **Added Rules**:
   - *Rule 6*: Agent has no reliable clock/current-date context; must never assume today's date or independently resolve relative time expressions without an anchor date.
   - *Rule 7*: If a request requires filtering/sorting that tools do not natively support (date ranges, amount thresholds, sorting), explicitly disclose that limitation. If inspecting client-side, state that client-side inspection occurred and disclose the number of records inspected.
 
 > **Important Clarification on Prompt Scope**:
-> The prompt experiment results below reflect the **reverted experimental prompt** (`082011a`), **NOT** the final shipped baseline prompt. The final shipped prompt was not evaluated on H5–H7.
+> The prompt experiment results below reflect the **reverted experimental prompt** (SHA-256 `76e94f59…`), **NOT** the final shipped baseline prompt. The final shipped prompt was not evaluated on H5–H7.
 
 ### Experiment Evaluation Results (`openai/gpt-oss-120b`)
 
@@ -151,7 +151,7 @@ A manual trace audit of individual trial executions revealed key operational fin
 The keep condition (a clean 120B regression run) could not be completed, so the revision was reverted. H2 and H6 also did not improve.
 
 ### Final Verifiable State
-- **Final Baseline Git Commit**: `ba3da63756cee78de282fdaaad053fa291a95672`
+- **Final Baseline Git Commit (Submitted HEAD)**: `2dd5a4551b08ab75b42b7e466b925204a840132d` (restoring baseline prompt following internal experiment revert commit `ba3da63756cee78de282fdaaad053fa291a95672`)
 - **Baseline System Prompt SHA-256**: `4e1ead80a9f7e384db8d5f3f74c4b3877064c6de51f2fc9c2040af7043ced69f`
 - **Unit & Grader Test Suite**: **119 passed, 5 skipped** (124 tests collected)
 - **Code Quality**: `ruff check .` clean (`All checks passed!`)

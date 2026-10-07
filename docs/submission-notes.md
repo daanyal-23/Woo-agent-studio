@@ -60,7 +60,7 @@ A programmatic grading harness evaluating agent performance without human interv
 3. **Grader False-Positive Discovery & Fix**:
    Initial H2 testing scored 1/1 because the keyword grader matched table headers containing `"Date Created (UTC)"`. The grader was tightened to enforce semantic capability disclosure (`evals/results/eval_run_20261007_085912.json`, score 0.55), correctly catching the omission.
 4. **General Prompt Experiment & Revert Rationale**:
-   A general prompt addition (Rules 6 & 7) was tested on commit `082011aad3ff7d34dad8beb67e2c832da54560ae`. The keep condition (a clean 120B regression run) could not be completed, so the revision was reverted. H2 and H6 also did not improve.
+   A general prompt addition (Rules 6 & 7, prompt SHA-256 `76e94f59cedc261958b68051b9dc7e0f910771992b638cd0bc74e7fb361e88b1`) was tested during an earlier internal authoring iteration (internal development commit `082011aad3ff7d34dad8beb67e2c832da54560ae`, not part of the submitted repository history). The keep condition (a clean 120B regression run) could not be completed, so the revision was reverted. H2 and H6 also did not improve.
 5. **Shipped Prompt Evaluation Scope**:
    The shipped baseline prompt was **NOT** evaluated on H5–H7 (those results reflect the reverted experimental prompt).
 6. **H7 Quota Accounting**:
@@ -72,7 +72,7 @@ A programmatic grading harness evaluating agent performance without human interv
 
 | Verification Metric | Value |
 |---|---|
-| **Final Baseline Commit** | `ba3da63756cee78de282fdaaad053fa291a95672` |
+| **Final Baseline Commit (Submitted HEAD)** | `2dd5a4551b08ab75b42b7e466b925204a840132d` (restoring baseline prompt following internal experiment revert commit `ba3da63756cee78de282fdaaad053fa291a95672`) |
 | **Baseline System Prompt SHA-256** | `4e1ead80a9f7e384db8d5f3f74c4b3877064c6de51f2fc9c2040af7043ced69f` |
 | **Tested Experiment Prompt SHA-256** | `76e94f59cedc261958b68051b9dc7e0f910771992b638cd0bc74e7fb361e88b1` |
 | **Original H2 Tightened Artifact SHA-256** | `8380c57c86a784c14912655f02829f2ac189935fe8c3f61c0879af7e9ac941d7` |
