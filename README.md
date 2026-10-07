@@ -1,18 +1,153 @@
 # WooCommerce Agent Connector (Forward-Deployed Engineer, Agent Studio: Assignment 3)
 
-A secure, read-only Model Context Protocol (MCP) connector and evaluation harness integrating open-weight AI agents with WooCommerce merchant stores.
+## 1. What This Is
 
-> **Project Scope:**
-> This repository contains the complete implementation for Forward-Deployed Engineer, Agent Studio: Assignment 3:
-> 1. Reusable synchronous HTTP client with resilient exponential retry & error classification (`src/woo_connector/`).
-> 2. Normalized domain models with PII minimization and idempotent store seeding (`src/woo_connector/seed.py`).
-> 3. Read-only FastMCP stdio server exposing exactly 6 tools (`woo_connector.mcp_server`).
-> 4. Groq-powered merchant operations agent demonstration (`agent_demo/`).
-> 5. Programmatic evaluation harness with grounding and negative constraints (`evals/`).
+A secure, read-only Model Context Protocol (MCP) connector and evaluation harness integrating open-weight AI agents (Groq `openai/gpt-oss-120b`) with WooCommerce merchant stores over standard I/O (stdio).
+
+It wraps the WooCommerce REST API (v3) to provide AI agents with structured, read-only access to merchant catalog products and orders with strict PII minimization, deterministic pagination, resilient retries, structured error handling, and prompt-injection defense.
 
 ---
 
-## Architecture & Features
+## 2. Real Merchant / Support Problem
+
+*Grounded strictly in [docs/merchant-scenarios.md](docs/merchant-scenarios.md). All test store data is fictional; operational impact describes a hypothesis for production merchant discovery.*
+
+### Merchant & Support Persona
+A non-technical support or operations specialist at a small-to-medium online merchant that processes payments through a gateway.
+
+### The Repetitive Support Problem
+Store data is technically available in the WooCommerce admin, but resolving customer tickets requires high-overhead lookup loops: cross-referencing orders across multiple screens, interpreting complex payment lifecycle states, and maintaining consistent communication under support volume.
+
+- **Failed-Payment Inquiries:** *"My payment failed on order 21. Was I charged?"* Support must locate the order, verify transaction IDs, and confirm failure states without guessing gateway-internal reasons.
+- **Refund Inquiries:** *"Where is my refund?"* Some order states are easily misread (e.g. Order 25 is `completed` with a ₹1,000 partial refund on a ₹4,999 total; filtering only by `status=refunded` misses it completely).
+- **Plan & Pricing Inquiries:** *"Which subscription plan costs what, and is it currently active?"* Support repeatedly looks up catalog prices, active statuses, and add-on package terms.
+
+### Why an Agent is Useful
+An agent connected via MCP automates the lookup loop: retrieving normalized order totals, lifecycle status flags, payment methods, refund aggregates, and catalog pricing through a single natural-language interface, enabling human support agents to resolve customer tickets accurately and consistently.
+
+### What the System Intentionally Does NOT Automate
+- **Zero Mutations or Writes:** No automated refunds, balance transfers, status edits, retries, or deletions.
+- **No Direct Customer Messaging:** The agent does not send unapproved emails or contact customers directly.
+- **No Unmasked Contact PII:** Customer emails are masked (`d***a@example.com`); customer phone numbers, street addresses, and customer notes are omitted from tool schemas.
+
+### How Success Would Be Measured
+*Proposed operational metrics for production merchant rollouts (hypotheses to baseline against ticket history; not claims of past production measurements):*
+
+| Metric | How It Would Be Measured (Proposed) |
+|---|---|
+| **Time to Answer** | Baseline average resolution time on payment and refund inquiries vs. agent-assisted lookup. |
+| **Answer Accuracy** | Human support verification of agent answers against WooCommerce admin during shadow mode. |
+| **Support Deflection** | Reduction in repeat follow-up contacts on the same order issues. |
+| **Escalation Rate** | Reduction in ticket escalations to engineering or finance for routine status/refund checks. |
+
+*(Note: These proposed operational KPIs are distinct from the deterministic test-suite and evaluation benchmarks reported below).*
+
+---
+
+## 3. Architecture
+
+```text
+LLM / MCP Host (Groq openai/gpt-oss-120b)
+        ↑ (stdio JSON-RPC transport)
+FastMCP Server (src/woo_connector/mcp_server.py)
+        ↑ (6 read-only tools, PII masking, untrusted text boundaries)
+ProductService / OrderService (products.py, orders.py)
+        ↑ (Normalized Domain Models: Product, Order, PaginatedResult)
+WooCommerceClient (client.py)
+        ↑ (HTTP Basic Auth, retry with backoff, Retry-After parsing)
+WooCommerce REST API (/wp-json/wc/v3)
+```
+
+---
+
+## 4. 5-Command Local Setup & Verification
+
+These commands install the project and verify the local codebase. The live agent demo additionally requires a reachable WooCommerce instance and credentials as described below.
+
+```bash
+# 1. Clone and install package with dev and demo dependencies
+git clone https://github.com/daanyal-23/razorpay-woo-agent-studio.git
+cd razorpay-woo-agent-studio
+pip install -e ".[dev,demo]"
+
+# 2. Configure environment variables (copy .env.example)
+cp .env.example .env
+
+# 3. Run unit tests (119 passed, 5 skipped without live credentials)
+pytest
+
+# 4. Run linter and formatting check
+ruff check .
+
+# 5. Start the MCP stdio server
+python -m woo_connector.mcp_server
+```
+
+---
+
+## 5. Agent Demo
+
+The demo demonstrates an open-weight LLM on Groq discovering and invoking the 6 MCP tools over stdio to answer operational merchant questions.
+
+```bash
+# Set Groq API key and store credentials in your environment
+export GROQ_API_KEY="your_groq_api_key_here"
+export WOO_BASE_URL="http://localhost:8080"
+export WOO_CONSUMER_KEY="ck_your_read_key"
+export WOO_CONSUMER_SECRET="cs_your_read_secret"
+export WOO_ALLOW_INSECURE_HTTP="true"  # for local dev
+
+# Run all 4 demonstration scenarios (Catalog, Failed Orders, Refunds, Prompt-Injection Resilience)
+python -m agent_demo
+
+# Run interactive CLI session
+python -m agent_demo --interactive
+```
+
+---
+
+## 6. Six Read-Only MCP Tools
+
+| MCP Tool Name | Description & Parameters | Return Domain Model |
+|---|---|---|
+| `woo_list_products` | Browse catalog with pagination (`page`, `per_page`) and optional status filter (`publish`, `draft`, `pending`, `private`). | `PaginatedResult[Product]` |
+| `woo_get_product` | Retrieve normalized product by integer `product_id`. | `Product` |
+| `woo_search_products` | Keyword search via native WooCommerce `search` query parameter (`query`, `page`, `per_page`, `status`). | `PaginatedResult[Product]` |
+| `woo_list_orders` | Browse orders with pagination and lifecycle status filter (`pending`, `processing`, `on-hold`, `completed`, `cancelled`, `refunded`, `failed`). | `PaginatedResult[Order]` |
+| `woo_get_order` | Retrieve normalized, PII-minimized order by integer `order_id`. | `Order` |
+| `woo_search_orders` | Keyword search via native WooCommerce `search` query parameter (`query`, `page`, `per_page`, `status`). | `PaginatedResult[Order]` |
+
+*All 6 tools are annotated with `readOnlyHint=True`. The MCP server registers zero write or mutation endpoints.*
+
+---
+
+## 7. What It Can and Cannot Do
+
+| Area | What the Agent CAN Do | What It CANNOT Do (By Design & Boundaries) |
+|---|---|---|
+| **Orders & Payments** | Identify failed orders, totals, payment methods, and transaction IDs. | Retrieve gateway-side failure reasons (e.g., bank OTP timeouts) from WooCommerce alone; retry or initiate payments. |
+| **Refunds** | Detect full refunds and partial refunds on completed orders (`refund_total`). | View itemized refund line dates; issue refunds or transfer funds. |
+| **Search** | Match order records by query text or transaction ID in native WooCommerce search. | Guarantee search field indexing; semantic or fuzzy vector matching. |
+| **Catalog** | Retrieve product names, regular/sale prices in INR, and stock states. | Multi-currency conversions; update product stock or create draft products. |
+| **Filtering & Sorting** | Filter orders and products by native lifecycle status flags. | Native date-range filtering, amount threshold filtering, or server-side sorting (tools lack native date/amount filters). |
+| **Data Privacy** | Provide customer names and masked emails (`d***a@example.com`). | Expose customer telephone numbers, street shipping addresses, or customer notes. |
+| **Security** | Treat merchant text strictly as untrusted data; suppress prompt injections. | Guarantee immunity if downstream host evaluates free-text tool output as system instructions. |
+
+---
+
+## 8. Deep-Dive Documentation
+
+- [docs/merchant-scenarios.md](docs/merchant-scenarios.md) — Merchant persona, real support problems, discovery questions, rollout path, and risk mitigations.
+- [docs/capabilities.md](docs/capabilities.md) — MCP tool contracts, exact literal type definitions, PII masking rules, and verified search semantics.
+- [docs/evaluation-scenarios.md](docs/evaluation-scenarios.md) — Technical catalog of 12 primary development scenarios, held-out capability tests (H1–H7), and 401 write-rejection verification.
+- [docs/evaluation-history.md](docs/evaluation-history.md) — Chronological benchmark provenance, grader v2 audit, prompt experiment evaluation, and H7 quota accounting.
+- [docs/submission-notes.md](docs/submission-notes.md) — Assignment 3 deliverables summary, engineering findings, and verified baseline state.
+
+---
+
+## Part A: Reusable HTTP Client & Core Architecture
+
+The core client library (`src/woo_connector/client.py`) provides a robust foundation for all WooCommerce API communications:
 
 - **Sync HTTP Client (`httpx`):** Reusable client handling authentication, safe URL composition preserving base paths, timeouts, and response extraction.
 - **Security & Validation (`pydantic`):** Enforces HTTPS by default. Insecure HTTP is rejected at startup unless explicitly permitted via `WOO_ALLOW_INSECURE_HTTP=true` for local development. Credentials (`consumer_secret`) are protected with `SecretStr` and never leaked in logs or error messages.
@@ -22,21 +157,7 @@ A secure, read-only Model Context Protocol (MCP) connector and evaluation harnes
 
 ---
 
-## Installation
-
-Ensure Python 3.11+ is installed.
-
-```bash
-# From the woo-agent-connector repository directory
-pip install -e .
-
-# Or install with development and test dependencies
-pip install -e ".[dev]"
-```
-
----
-
-## Configuration
+## Configuration Reference
 
 Copy `.env.example` to `.env` and fill in your WooCommerce credentials:
 
@@ -52,27 +173,6 @@ cp .env.example .env
 | `WOO_ALLOW_INSECURE_HTTP` | No | `false` | Set to `true` **ONLY** for local development over HTTP. Production must use HTTPS. |
 | `WOO_TIMEOUT_SECONDS` | No | `15.0` | Request timeout in seconds. |
 | `WOO_LIVE_TEST` | No | `0` | Set to `1` to enable the opt-in live smoke test. |
-
----
-
-## Running Unit Tests
-
-All unit tests execute instantly in memory against mocked responses (`respx`) with zero network access and fake sleep:
-
-```bash
-pytest
-```
-
----
-
-## Code Quality & Linting
-
-Run Ruff to format and lint the repository:
-
-```bash
-ruff check .
-ruff format --check .
-```
 
 ---
 
@@ -165,45 +265,6 @@ Running the seed command a second time will report that all 5 products and 12 or
 
 Phase B2 delivers read-only connector services querying the official WooCommerce REST API, with deterministic pagination, lean normalized domain models, exact SKU lookups, and strict PII minimization.
 
-### Architecture Overview
-
-```text
-WooCommerce REST API
-        ↑ (HTTP Basic Auth, retry, backoff)
-WooCommerceClient
-        ↑
-ProductService / OrderService
-        ↓
-Normalized Product / Order Models
-        ↓
-PaginatedResult[T]
-```
-
-### Services & Operations
-
-#### 1. `ProductService` (`woo_connector.products`)
-- **`list_products(page=1, per_page=10, status=None) -> PaginatedResult[Product]`**  
-  Issues `GET /products`. Supports pagination parameters and status filtering.
-- **`get_product(product_id: int) -> Product`**  
-  Issues `GET /products/{id}`. Returns normalized `Product`. Raises `NotFoundError` (404) if absent.
-- **`search_products(query: str, page=1, per_page=10, status=None) -> PaginatedResult[Product]`**  
-  Issues `GET /products?search=<query>`. Uses WooCommerce's native full-text search.
-- **`get_product_by_sku(sku: str) -> Product | None`**  
-  Issues `GET /products?sku=<sku>`.  
-  - Returns `Product` if exactly one matching product is found.
-  - Returns `None` if zero products match.
-  - Raises `ResponseParseError` if more than one product matches (ensuring SKU uniqueness).
-
-#### 2. `OrderService` (`woo_connector.orders`)
-- **`list_orders(page=1, per_page=10, status=None) -> PaginatedResult[Order]`**  
-  Issues `GET /orders`. Supports deterministic `status` filtering (e.g. `completed`, `processing`).
-- **`get_order(order_id: int) -> Order`**  
-  Issues `GET /orders/{id}`. Returns normalized, PII-minimized `Order`.
-- **`search_orders(query: str, page=1, per_page=10, status=None) -> PaginatedResult[Order]`**  
-  Issues `GET /orders?search=<query>`. Relies solely on WooCommerce native search semantics.
-
----
-
 ### Pagination Contract (`PaginatedResult[T]`)
 
 Services return an immutable `PaginatedResult[T]` container:
@@ -230,15 +291,6 @@ Services return an immutable `PaginatedResult[T]` container:
   - `total_count = None`
   - `total_pages = None`
 - The connector **never** auto-fetches subsequent pages; callers request subsequent pages explicitly.
-
----
-
-### PII Minimization & Untrusted Data Handling
-
-- **Customer Email Masking:** Immediate masking upon extraction (e.g., `d***a@example.com`).
-- **Omitted Attributes:** Phone numbers, physical street addresses, customer notes, and internal raw metadata are excluded by default from the normalized model.
-- **Free-Text Normalization:** Strips HTML tags, unescapes entities, normalizes consecutive whitespace, and caps length.
-- **Prompt Injection Resilience:** Untrusted merchant descriptions (including prompt injection test fixtures) are strictly treated as literal string data and never interpreted or executed.
 
 ---
 
@@ -274,7 +326,7 @@ pytest -v -k test_live_phase_b2
 
 ---
 
-## Part C: FastMCP stdio Server
+## Part C: FastMCP stdio Server Architecture
 
 Part C exposes the read-only connector operations over standard I/O (stdio) using the official Model Context Protocol (MCP) Python SDK (`mcp>=2.3.0,<3`).
 
@@ -282,25 +334,8 @@ Part C exposes the read-only connector operations over standard I/O (stdio) usin
 - **Protocol**: FastMCP / `MCPServer` communicating over stdio JSON-RPC.
 - **Fail-Fast Configuration**: Validates connector configuration upon launch. Exits cleanly with status 1 on `sys.stderr` if configuration is missing or invalid.
 - **Single Shared Client**: Instantiates one shared `WooCommerceClient` at server startup and safely closes it via lifespan shutdown.
-- **Six Read-Only Tools**:
-  - `woo_list_products`: Paginated product browsing with optional status filter.
-  - `woo_get_product`: Retrieve product by numeric ID.
-  - `woo_search_products`: Keyword search via WooCommerce's native `search` parameter. Not semantic or fuzzy. Which fields match is not guaranteed.
-  - `woo_list_orders`: Paginated order browsing with PII minimization and lifecycle status filter.
-  - `woo_get_order`: Retrieve order by numeric ID.
-  - `woo_search_orders`: Keyword search via WooCommerce's native `search` parameter. Not semantic or fuzzy. Which fields match is not guaranteed.
 - **Tool Annotations**: All six tools are decorated with `readOnlyHint=True`.
 - **Structured Error Payloads**: Mapped to uppercase error codes (`INVALID_INPUT`, `UNEXPECTED_RESPONSE`, `NOT_FOUND`, `AUTHENTICATION_FAILED`, `PERMISSION_DENIED`, `RATE_LIMIT_EXCEEDED`, `SERVER_ERROR`, `INTERNAL_ERROR`).
-
-### Running the MCP Server
-
-```bash
-# Using Python module execution
-python -m woo_connector.mcp_server
-
-# Or via the installed console script
-woo-connector-mcp
-```
 
 ### Example MCP Client Configuration
 
@@ -328,42 +363,6 @@ Example client configuration (e.g. for Claude Desktop, Cursor, Antigravity) poin
 ### Limitations
 - **Synchronous Execution & Threading**: Tools execute synchronously using the shared `WooCommerceClient`. FastMCP automatically offloads synchronous tool functions to a worker thread via `anyio.to_thread.run_sync`. Consequently, while retry delays (`time.sleep`) block the specific worker thread servicing that tool call, the main asyncio event loop handling stdio JSON-RPC transport remains non-blocked.
 - **Search Semantics**: Search tools perform native WordPress query filtering, not semantic vector search.
-
----
-
-## Running the Agent Demo
-
-The `agent_demo` package demonstrates an open-weight LLM on Groq discovering and invoking the WooCommerce MCP tools over stdio to answer merchant inquiries.
-
-### Requirements & Setup
-Install the optional demo dependencies:
-```bash
-pip install -e ".[demo]"
-```
-
-Set the required environment variables:
-```bash
-# Groq API Key for inference
-export GROQ_API_KEY="your_groq_api_key_here"
-
-# WooCommerce MCP server credentials
-export WOO_BASE_URL="http://localhost:8080"
-export WOO_CONSUMER_KEY="ck_your_consumer_key_here"
-export WOO_CONSUMER_SECRET="cs_your_consumer_secret_here"
-export WOO_ALLOW_INSECURE_HTTP="true"  # for local development
-```
-
-### Running Scenarios
-```bash
-# Run all four demonstration scenarios (Catalog, Failed Orders, Refunds, Prompt-Injection Resilience)
-python -m agent_demo
-
-# Run a specific scenario (A, B, C, or D)
-python -m agent_demo --scenario A
-
-# Start an interactive CLI session with the agent
-python -m agent_demo --interactive
-```
 
 ---
 
@@ -404,10 +403,11 @@ The pre-change development suite completed **36 / 36 trials (100.0%)** on `opena
 - **Final Baseline State**: Submitted repository HEAD `2dd5a4551b08ab75b42b7e466b925204a840132d` with baseline prompt SHA-256 `4e1ead80a9f7e384db8d5f3f74c4b3877064c6de51f2fc9c2040af7043ced69f` (restoring baseline prompt following internal experiment revert commit `ba3da63756cee78de282fdaaad053fa291a95672`).
 
 For in-depth details, see:
-- [docs/evaluation-history.md](docs/evaluation-history.md) — Comprehensive evaluation history, benchmark artifacts, and prompt experiment audit.
-- [docs/evaluation-scenarios.md](docs/evaluation-scenarios.md) — Complete scenario catalog, known limitations, and read-only 401 verification.
-- [docs/submission-notes.md](docs/submission-notes.md) — Forward-Deployed Engineer, Agent Studio: Assignment 3 submission notes and deliverables summary.
+- [docs/merchant-scenarios.md](docs/merchant-scenarios.md) — Merchant persona, real support problems, discovery questions, rollout path, and risk mitigations.
 - [docs/capabilities.md](docs/capabilities.md) — Connector capabilities, tool specifications, and PII contracts.
+- [docs/evaluation-scenarios.md](docs/evaluation-scenarios.md) — Complete scenario catalog, known limitations, and read-only 401 verification.
+- [docs/evaluation-history.md](docs/evaluation-history.md) — Comprehensive evaluation history, benchmark artifacts, and prompt experiment audit.
+- [docs/submission-notes.md](docs/submission-notes.md) — Forward-Deployed Engineer, Agent Studio: Assignment 3 submission notes and deliverables summary.
 
 ---
 
@@ -426,7 +426,3 @@ python -m evals --scenario 2
 # Run standalone read-only key verification probe
 python -m evals --verify-readonly-key
 ```
-
-
-
-
