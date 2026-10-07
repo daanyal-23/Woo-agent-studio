@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-10-07T07:05:35.951995+00:00",
+    "model": "openai/gpt-oss-120b",
+    "total_scenarios": 1,
+    "total_trials": 1,
+    "passed_trials": 0,
+    "pass_rate_pct": 0.0
+  },
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "list_plans_with_prices",
+      "category": "Catalog",
+      "prompt": "What subscription plans and add-ons are available in the store and what are their prices?",
+      "trials_count": 1,
+      "passed_count": 0,
+      "pass_rate": 0.0,
+      "trials": [
+        {
+          "trial_index": 1,
+          "passed": false,
+          "score": 0.55,
+          "duration_seconds": 2.9,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_products"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": false,
+            "direct_passed": false,
+            "derived_passed": true,
+            "missing_direct": [
+              "Payment Gateway Add-on",
+              "1499",
+              "4999",
+              "9999"
+            ],
+            "derived_results": [],
+            "reasons": [
+              "Missing required direct entity in answer: 'Payment Gateway Add-on'",
+              "Missing required direct entity in answer: '1499'",
+              "Missing required direct entity in answer: '4999'",
+              "Missing required direct entity in answer: '9999'"
+            ]
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "**Subscription plans**\n\n| Plan | SKU | Price (\u20b9) |\n|------|-----|-----------|\n| Starter Merchant Plan |\u202fPROD-STARTER-PLAN |\u202f\u20b9\u202f499.00 |\n| Merchant Pro Plan |\u202fPROD-MERCHANT-PRO |\u202f\u20b9\u202f1,499.00 |\n| Premium Annual Plan |\u202fPROD-PREMIUM-ANNUAL |\u202f\u20b9\u202f4,999.00 |\n| Enterprise Support Package* |\u202fPROD-ENTERPRISE-SUPPORT |\u202f\u20b9\u202f9,999.00 |\n\n\\*The \u201cEnterprise Support Package\u201d is listed as a product that provides a dedicated support service; it can be treated as a premium subscription\u2011type offering.\n\n**Add\u2011on products**\n\n| Add\u2011on | SKU | Price (\u20b9) |\n|--------|-----|-----------|\n| Payment Gateway Add\u2011on |\u202fPROD-GATEWAY-ADDON |\u202f\u20b9\u202f799.00 |\n\nAll amounts are shown in the store\u2019s currency, Indian Rupees (\u20b9).",
+          "error": null
+        }
+      ]
+    }
+  ]
+}

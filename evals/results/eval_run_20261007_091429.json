@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-10-07T09:14:29.385324+00:00",
+    "git_commit_hash": "082011aad3ff7d34dad8beb67e2c832da54560ae",
+    "system_prompt_sha256": "76e94f59cedc261958b68051b9dc7e0f910771992b638cd0bc74e7fb361e88b1",
+    "model": "openai/gpt-oss-120b",
+    "suite": "scenario_H5",
+    "suite_version": "1.1",
+    "total_scenarios": 1,
+    "total_trials": 3,
+    "passed_trials": 2,
+    "pass_rate_pct": 66.7
+  },
+  "scenarios": [
+    {
+      "id": "H5",
+      "name": "heldout_yesterdays_refunds",
+      "category": "Capability Boundary & Date Context",
+      "prompt": "Show me yesterday's refunds.",
+      "trials_count": 3,
+      "passed_count": 2,
+      "pass_rate": 0.67,
+      "trials": [
+        {
+          "trial_index": 1,
+          "passed": false,
+          "score": 0.55,
+          "duration_seconds": 2.5,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_orders"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": false,
+            "direct_passed": true,
+            "derived_passed": false,
+            "missing_direct": [],
+            "derived_results": [
+              {
+                "passed": false,
+                "message": "Agent failed to disclose clock/date limitation or client-side inspection for 'yesterday' refunds query."
+              }
+            ],
+            "reasons": [
+              "Derived mathematical check failed: Agent failed to disclose clock/date limitation or client-side inspection for 'yesterday' refunds query."
+            ]
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "I\u2019ve retrieved the list of orders that are currently marked with the **\u201crefunded\u201d** status. The store has one such order:\n\n| Order\u202fID | Date\u202fCreated (UTC) | Customer | Product(s) | Refund\u202fAmount |\n|----------|-------------------|----------|------------|---------------|\n| **22** | 2026\u201110\u201106\u202f07:59:30 | Vikram\u202fSingh | Merchant\u202fPro\u202fPlan (Qty\u202f1) | \u20b91,499.00 |\n\nBecause I don\u2019t have a reliable reference for \u201ctoday\u2019s\u201d date, I can\u2019t definitively tell whether this refund occurred **yesterday**. If you can tell me the exact date you consider \u201cyesterday,\u201d I can confirm whether this order matches that day. Otherwise, the above is the only refunded order currently in the system.",
+          "error": null
+        },
+        {
+          "trial_index": 2,
+          "passed": true,
+          "score": 1.0,
+          "duration_seconds": 1.53,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": true,
+            "direct_passed": true,
+            "derived_passed": true,
+            "missing_direct": [],
+            "derived_results": [
+              {
+                "passed": true,
+                "message": "Correctly disclosed date/capability boundary or client-side inspection for refunds."
+              }
+            ],
+            "reasons": []
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "I\u2019m sorry, but I can\u2019t determine which refunds were made **yesterday**.\n\nThe available read\u2011only tools let me list orders and filter them by their lifecycle status (e.g., \u201crefunded\u201d), but they do not support filtering by a specific date or date range.\u202fSince I also don\u2019t have a reliable current\u2011date context, I can\u2019t calculate which of those refunded orders correspond to \u201cyesterday\u201d.\n\nIf you\u2019d like, I can retrieve a list of the most recent refunded orders (up to the limit of the tool) and you can then check the\u202f`date_created`\u202ffield yourself to see which ones fall on the date you\u2019re interested in. Let me know if you\u2019d like me to do that.",
+          "error": null
+        },
+        {
+          "trial_index": 3,
+          "passed": true,
+          "score": 1.0,
+          "duration_seconds": 1.34,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": true,
+            "direct_passed": true,
+            "derived_passed": true,
+            "missing_direct": [],
+            "derived_results": [
+              {
+                "passed": true,
+                "message": "Correctly disclosed date/capability boundary or client-side inspection for refunds."
+              }
+            ],
+            "reasons": []
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "I\u2019m sorry, but I can\u2019t determine which refunds were made **yesterday**.\n\nThe available read\u2011only tools let me list orders and filter them by their lifecycle status (e.g.,\u202f`refunded`), but they do **not** support filtering by a specific date or date range. Since I don\u2019t have a reliable \u201ctoday\u201d reference, I can\u2019t calculate which of those refunded orders correspond to \u201cyesterday\u201d.\n\nIf you\u2019d like, I can retrieve a list of all recent orders that have the status **refunded** (or a larger set of orders) and you can then check the `date_created` field yourself to see which ones were created yesterday. Let me know if you\u2019d like me to do that.",
+          "error": null
+        }
+      ]
+    }
+  ]
+}

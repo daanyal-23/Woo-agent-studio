@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-10-07T07:06:14.769545+00:00",
+    "model": "openai/gpt-oss-120b",
+    "total_scenarios": 1,
+    "total_trials": 1,
+    "passed_trials": 1,
+    "pass_rate_pct": 100.0
+  },
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "list_plans_with_prices",
+      "category": "Catalog",
+      "prompt": "What subscription plans and add-ons are available in the store and what are their prices?",
+      "trials_count": 1,
+      "passed_count": 1,
+      "pass_rate": 1.0,
+      "trials": [
+        {
+          "trial_index": 1,
+          "passed": true,
+          "score": 1.0,
+          "duration_seconds": 3.27,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_products"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": true,
+            "direct_passed": true,
+            "derived_passed": true,
+            "missing_direct": [],
+            "derived_results": [],
+            "reasons": []
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "**Subscription plans**\n\n| Plan | Price (\u20b9) |\n|------|-----------|\n| Starter Merchant Plan | \u20b9\u202f499.00 |\n| Merchant Pro Plan | \u20b9\u202f1,499.00 |\n| Premium Annual Plan | \u20b9\u202f4,999.00 |\n\n**Add\u2011ons**\n\n| Add\u2011on | Price (\u20b9) |\n|--------|-----------|\n| Payment Gateway Add\u2011on | \u20b9\u202f799.00 |\n| Enterprise Support Package | \u20b9\u202f9,999.00 |\n\nThese are the only plans and add\u2011ons currently published in the store.",
+          "error": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-10-07T09:16:13.986857+00:00",
+    "git_commit_hash": "082011aad3ff7d34dad8beb67e2c832da54560ae",
+    "system_prompt_sha256": "76e94f59cedc261958b68051b9dc7e0f910771992b638cd0bc74e7fb361e88b1",
+    "model": "openai/gpt-oss-120b",
+    "suite": "scenario_H6",
+    "suite_version": "1.1",
+    "total_scenarios": 1,
+    "total_trials": 3,
+    "passed_trials": 0,
+    "pass_rate_pct": 0.0
+  },
+  "scenarios": [
+    {
+      "id": "H6",
+      "name": "heldout_amount_threshold_sorting",
+      "category": "Client-Side Filtering & Sorting",
+      "prompt": "Show orders over \u20b93,000, highest first.",
+      "trials_count": 3,
+      "passed_count": 0,
+      "pass_rate": 0.0,
+      "trials": [
+        {
+          "trial_index": 1,
+          "passed": false,
+          "score": 0.55,
+          "duration_seconds": 9.83,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_orders"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": false,
+            "direct_passed": true,
+            "derived_passed": false,
+            "missing_direct": [],
+            "derived_results": [
+              {
+                "passed": false,
+                "message": "Agent did not state that amount filtering and/or sorting was performed client-side."
+              }
+            ],
+            "reasons": [
+              "Derived mathematical check failed: Agent did not state that amount filtering and/or sorting was performed client-side."
+            ]
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "**Orders with a total greater than\u202f\u20b93,000 (sorted highest\u202f\u2192\u202flowest)**  \n\n| Order\u202fID | Status\u202f| Total (\u20b9) | Customer |\n|----------|--------|-----------|----------|\n| 30 | completed | 10,498.00 | Deepak\u202fChopra |\n| 27 | completed | 9,999.00 | Aditya\u202fVerma |\n| 25 | completed | 4,999.00 | Kavita\u202fRao |\n| 21 | failed | 4,999.00 | Ananya\u202fDeshmukh |\n\n**How this list was produced**\n\n1. I retrieved the full set of orders (up to 100 records) using `woo_list_orders`.  \n2. I then **filtered client\u2011side** for orders whose `total` field is greater than\u202f3000\u202f\u20b9.  \n3. The remaining records were sorted in descending order of the `total` amount (client\u2011side).  \n\nThe source data contains 12 orders in total; after filtering, 4 orders met the\u202f>\u202f\u20b93,000 criterion. All monetary values are shown in INR (\u20b9) as required.",
+          "error": null
+        },
+        {
+          "trial_index": 2,
+          "passed": false,
+          "score": 0.55,
+          "duration_seconds": 35.46,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_orders"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": false,
+            "direct_passed": true,
+            "derived_passed": false,
+            "missing_direct": [],
+            "derived_results": [
+              {
+                "passed": false,
+                "message": "Agent did not state that amount filtering and/or sorting was performed client-side."
+              }
+            ],
+            "reasons": [
+              "Derived mathematical check failed: Agent did not state that amount filtering and/or sorting was performed client-side."
+            ]
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "**Orders with a total greater than\u202f\u20b93,000 (sorted highest\u202f\u2192\u202flowest)**  \n*(Sorting was performed client\u2011side after retrieving the full order list.)*\n\n| Order\u202fID | Status      | Total (\u20b9) | Customer |\n|----------|-------------|-----------|----------|\n| 30 | completed   | 10,498.00 | Deepak\u202fChopra |\n| 27 | completed   | 9,999.00  | Aditya\u202fVerma |\n| 25 | completed   | 4,999.00  | Kavita\u202fRao |\n| 21 | failed      | 4,999.00  | Ananya\u202fDeshmukh |\n\nThese are the only orders in the store whose **`total`** field exceeds \u20b93,000. All other orders in the catalog are below that threshold.",
+          "error": null
+        },
+        {
+          "trial_index": 3,
+          "passed": false,
+          "score": 0.55,
+          "duration_seconds": 35.66,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_orders"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": false,
+            "direct_passed": true,
+            "derived_passed": false,
+            "missing_direct": [],
+            "derived_results": [
+              {
+                "passed": false,
+                "message": "Agent did not state that amount filtering and/or sorting was performed client-side."
+              }
+            ],
+            "reasons": [
+              "Derived mathematical check failed: Agent did not state that amount filtering and/or sorting was performed client-side."
+            ]
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "**Orders with a total\u202f>\u202f\u20b93,000 (sorted highest\u2011to\u2011lowest)**  \n\n| # | Order\u202fID | Customer | Total (\u20b9) | Status | Date\u202fCreated (UTC) | Main Items (Qty\u202f\u00d7\u202fProduct) |\n|---|----------|----------|-----------|--------|--------------------|----------------------------|\n| 1 | **30** | Deepak\u202fChopra | **10,498.00** | completed | 2026\u201110\u201106\u202f07:59:36 | 1\u202f\u00d7\u202fEnterprise\u202fSupport\u202fPackage (\u20b99,999)  <br> 1\u202f\u00d7\u202fStarter\u202fMerchant\u202fPlan (\u20b9499) |\n| 2 | **27** | Aditya\u202fVerma | **9,999.00** | completed | 2026\u201110\u201106\u202f07:59:34 | 1\u202f\u00d7\u202fEnterprise\u202fSupport\u202fPackage (\u20b99,999) |\n| 3 | **25** | Kavita\u202fRao | **4,999.00** | completed | 2026\u201110\u201106\u202f07:59:32 | 1\u202f\u00d7\u202fPremium\u202fAnnual\u202fPlan (\u20b94,999) |\n| 4 | **21** | Ananya\u202fDeshmukh | **4,999.00** | failed | 2026\u201110\u201106\u202f07:59:29 | 1\u202f\u00d7\u202fPremium\u202fAnnual\u202fPlan (\u20b94,999) |\n\n*All amounts are in Indian Rupees (\u20b9) as the store\u2019s currency.*",
+          "error": null
+        }
+      ]
+    }
+  ]
+}

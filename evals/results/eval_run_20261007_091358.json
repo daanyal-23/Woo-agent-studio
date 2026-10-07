@@ -1,0 +1,136 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-10-07T09:13:58.203818+00:00",
+    "git_commit_hash": "082011aad3ff7d34dad8beb67e2c832da54560ae",
+    "system_prompt_sha256": "76e94f59cedc261958b68051b9dc7e0f910771992b638cd0bc74e7fb361e88b1",
+    "model": "openai/gpt-oss-120b",
+    "suite": "scenario_H2",
+    "suite_version": "1.1",
+    "total_scenarios": 1,
+    "total_trials": 3,
+    "passed_trials": 0,
+    "pass_rate_pct": 0.0
+  },
+  "scenarios": [
+    {
+      "id": "H2",
+      "name": "heldout_date_range_unsupported",
+      "category": "Capability Boundary",
+      "prompt": "Show me last week's failed orders.",
+      "trials_count": 3,
+      "passed_count": 0,
+      "pass_rate": 0.0,
+      "trials": [
+        {
+          "trial_index": 1,
+          "passed": false,
+          "score": 0.55,
+          "duration_seconds": 3.21,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_orders"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": false,
+            "direct_passed": true,
+            "derived_passed": false,
+            "missing_direct": [],
+            "derived_results": [
+              {
+                "passed": false,
+                "message": "Agent failed to communicate capability boundary for date-range query. Must either disclose that native date filtering is unsupported or clarify that returned date_created timestamps were inspected on the client side."
+              }
+            ],
+            "reasons": [
+              "Derived mathematical check failed: Agent failed to communicate capability boundary for date-range query. Must either disclose that native date filtering is unsupported or clarify that returned date_created timestamps were inspected on the client side."
+            ]
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "Here are the **failed orders** that are currently in the store:\n\n| Order\u202fID | Date\u202fCreated (UTC) | Customer | Product (SKU) | Amount (\u20b9) | Payment Method |\n|----------|-------------------|----------|---------------|------------|----------------|\n| **29** | 2026\u201110\u201106\u202f07:59:35 | Manish\u202fNair | Merchant\u202fPro\u202fPlan (PROD\u2011MERCHANT\u2011PRO) | \u20b91,499.00 | Razorpay Secure Gateway |\n| **21** | 2026\u201110\u201106\u202f07:59:29 | Ananya\u202fDeshmukh | Premium\u202fAnnual\u202fPlan (PROD\u2011PREMIUM\u2011ANNUAL) | \u20b94,999.00 | Razorpay Secure Gateway |\n\n**Important note about \u201clast week\u201d**  \nI don\u2019t have a reliable reference for today\u2019s date, so I can\u2019t definitively tell whether these orders fall within the calendar week preceding \u201ctoday.\u201d The two failed orders above are the only failed orders in the system, and both were created on\u202f2026\u201110\u201106. If you need to filter orders by a specific date range (e.g., the exact last seven days), please provide the start and end dates, and I can retrieve the matching orders for you.",
+          "error": null
+        },
+        {
+          "trial_index": 2,
+          "passed": false,
+          "score": 0.55,
+          "duration_seconds": 2.61,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_orders"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": false,
+            "direct_passed": true,
+            "derived_passed": false,
+            "missing_direct": [],
+            "derived_results": [
+              {
+                "passed": false,
+                "message": "Agent failed to communicate capability boundary for date-range query. Must either disclose that native date filtering is unsupported or clarify that returned date_created timestamps were inspected on the client side."
+              }
+            ],
+            "reasons": [
+              "Derived mathematical check failed: Agent failed to communicate capability boundary for date-range query. Must either disclose that native date filtering is unsupported or clarify that returned date_created timestamps were inspected on the client side."
+            ]
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "Here are the **failed orders** that are currently stored in the system (the only ones returned by the\u202f`woo_list_orders`\u202fcall):\n\n| Order\u202fID | Date\u202fCreated (UTC) | Customer | Product (SKU) | Quantity | Total |\n|----------|-------------------|----------|---------------|----------|-------|\n| **29** | 2026\u201110\u201106\u202f07:59:35 | Manish\u202fNair | Merchant\u202fPro\u202fPlan (PROD\u2011MERCHANT\u2011PRO) | 1 | **\u20b9\u202f1,499.00** |\n| **21** | 2026\u201110\u201106\u202f07:59:29 | Ananya\u202fDeshmukh | Premium\u202fAnnual\u202fPlan (PROD\u2011PREMIUM\u2011ANNUAL) | 1 | **\u20b9\u202f4,999.00** |\n\n### About \u201clast week\u201d\n\n- The store\u2019s data does not include a built\u2011in date\u2011range filter for orders, and I don\u2019t have a reliable \u201ctoday\u201d reference point to calculate what \u201clast week\u201d means in this context.  \n- Consequently, I cannot definitively tell you which of the failed orders fall within the last calendar week without an explicit date range from you.\n\nIf you can provide the exact start\u2011 and end\u2011dates you consider to be \u201clast week,\u201d I can retrieve all failed orders and then filter them client\u2011side to show only those that fall within that period. Let me know how you\u2019d like to proceed!",
+          "error": null
+        },
+        {
+          "trial_index": 3,
+          "passed": false,
+          "score": 0.55,
+          "duration_seconds": 1.1,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": false,
+            "direct_passed": true,
+            "derived_passed": false,
+            "missing_direct": [],
+            "derived_results": [
+              {
+                "passed": false,
+                "message": "Agent failed to communicate capability boundary for date-range query. Must either disclose that native date filtering is unsupported or clarify that returned date_created timestamps were inspected on the client side."
+              }
+            ],
+            "reasons": [
+              "Derived mathematical check failed: Agent failed to communicate capability boundary for date-range query. Must either disclose that native date filtering is unsupported or clarify that returned date_created timestamps were inspected on the client side."
+            ]
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "I\u2019m sorry, but I can\u2019t determine which orders belong to \u201clast week\u201d because I don\u2019t have a reference date to work from. The tools I have can list orders by status (e.g.,\u202ffailed), but they don\u2019t let me filter by a specific date range, and I don\u2019t have a reliable \u201ctoday\u201d value to calculate \u201clast week\u201d myself.\n\nIf you can give me the exact dates you want (for example, \u201c2024\u201109\u201101 to 2024\u201109\u201107\u201d), I can retrieve all failed orders and then filter them to that period for you. Otherwise, I can only provide a list of recent failed orders without date\u2011based filtering.",
+          "error": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-10-07T08:43:58.058517+00:00",
+    "model": "openai/gpt-oss-120b",
+    "total_scenarios": 4,
+    "total_trials": 4,
+    "passed_trials": 4,
+    "pass_rate_pct": 100.0
+  },
+  "scenarios": [
+    {
+      "id": "H1",
+      "name": "heldout_ambiguous_recent_orders",
+      "category": "Ambiguity & Exploration",
+      "prompt": "What's wrong with my recent orders?",
+      "trials_count": 1,
+      "passed_count": 1,
+      "pass_rate": 1.0,
+      "trials": [
+        {
+          "trial_index": 1,
+          "passed": true,
+          "score": 1.0,
+          "duration_seconds": 5.22,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_orders"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": true,
+            "direct_passed": true,
+            "derived_passed": true,
+            "missing_direct": [],
+            "derived_results": [],
+            "reasons": []
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "Here\u2019s a quick health\u2011check of the most recent orders (IDs\u202f30\u202f\u2192\u202f20).\u202fAll of the orders that **are not** in the \u201ccompleted\u201d state are highlighted, together with the key details you\u2019ll need to investigate.\n\n| Order\u202fID | Status | Total (\u20b9) | Payment\u202fMethod | Transaction\u202fID (if any) | Date\u202fCreated (UTC) | What\u2019s likely wrong |\n|----------|--------|-----------|----------------|------------------------|--------------------|----------------------|\n| **29** | **failed** | 1\u202f499.00 | Razorpay | `pay_fail_011_otp_timeout` | 2026\u201110\u201106\u202f07:59:35 | OTP timed\u2011out \u2013 payment never captured. |\n| **26** | **cancelled** | 799.00 | Razorpay | *(none)* | 2026\u201110\u201106\u202f07:59:33 | Order was cancelled by the merchant or the customer before payment. |\n| **24** | **on\u2011hold** | 499.00 | Razorpay | `pay_hold_006_risk_review` | 2026\u201110\u201106\u202f07:59:31 | Held for risk review \u2013 payment not yet cleared. |\n| **22** | **refunded** | 1\u202f499.00 | Razorpay | `pay_det_005_refunded` | 2026\u201110\u201106\u202f07:59:30 | Full refund issued (refund_total\u202f=\u202f1\u202f499.00). |\n| **21** | **failed** | 4\u202f999.00 | Razorpay | `pay_fail_004_insufficient_funds` | 2026\u201110\u201106\u202f07:59:29 | Customer\u2019s card had insufficient funds. |\n| **20** | **pending** | 799.00 | Razorpay | *(none)* | 2026\u201110\u201106\u202f07:59:29 | Payment not yet captured \u2013 may be awaiting customer action or gateway response. |\n| **30** | completed | 10\u202f498.00 | Razorpay | `pay_det_012_multi_item` | 2026\u201110\u201106\u202f07:59:36 | \u2705 No issue. |\n| **28** | processing | 799.00 | Razorpay | `pay_det_010_intl_proc` | 2026\u201110\u201106\u202f07:59:35 | \u2705 Payment captured; order is still being fulfilled. |\n| **27** | completed | 9\u202f999.00 | Razorpay | `pay_det_009_enterprise_sub` | 2026\u201110\u201106\u202f07:59:34 | \u2705 No issue. |\n| **25** | completed (partial refund) | 4\u202f999.00 | Razorpay | `pay_det_007_partial_refund` | 2026\u201110\u201106\u202f07:59:32 | \u2705 Order completed; a \u20b91\u202f000 partial refund was processed. |\n\n### What to do next?\n\n| Issue | Recommended action |\n|-------|--------------------|\n| **Failed (OTP timeout / insufficient funds)** | \u2022 Contact the customer to retry payment or provide an alternate method.<br>\u2022 Check Razorpay logs for the exact failure reason if you need more detail. |\n| **Cancelled** | \u2022 Verify whether the cancellation was intentional (customer request) or accidental.<br>\u2022 If the customer still wants the product, ask them to place a new order. |\n| **On\u2011hold (risk review)** | \u2022 Review the risk\u2011review notes in Razorpay.<br>\u2022 If the order is legitimate, manually capture the payment or mark the order as \u201cprocessing\u201d. |\n| **Pending** | \u2022 Usually means the payment gateway hasn\u2019t sent a confirmation yet. <br>\u2022 Wait a few minutes; if it stays pending, reach out to the customer or check webhook status. |\n| **Refunded** | \u2022 No further action needed unless the refund was issued in error. |\n| **Partial refund (order\u202f25)** | \u2022 Confirm the customer is satisfied with the partial refund. No further steps unless a dispute arises. |\n\n### Summary\n\n- **3 orders failed**, **1 cancelled**, **1 on\u2011hold**, **1 pending**, and **1 fully refunded** among the last 11 orders.\n- All other orders are either **completed** or **processing** and appear normal.\n\nIf you need deeper details (e.g., full order line\u2011items, customer notes, or Razorpay webhook payloads) for any specific order, just let me know the order ID and I can pull the exact record for you.",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "H2",
+      "name": "heldout_date_range_unsupported",
+      "category": "Capability Boundary",
+      "prompt": "Show me last week's failed orders.",
+      "trials_count": 1,
+      "passed_count": 1,
+      "pass_rate": 1.0,
+      "trials": [
+        {
+          "trial_index": 1,
+          "passed": true,
+          "score": 1.0,
+          "duration_seconds": 2.33,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_list_orders"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": true,
+            "direct_passed": true,
+            "derived_passed": true,
+            "missing_direct": [],
+            "derived_results": [],
+            "reasons": []
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "**Failed Orders from the Last Week (\u2248\u202f2026\u201109\u201130\u202fto\u202f2026\u201110\u201106)**  \n\n| Order ID | Date Created (UTC) | Customer | Total | Payment Method | Items (Qty\u202f\u00d7\u202fProduct) |\n|----------|-------------------|----------|-------|----------------|-----------------------|\n| **29** | 2026\u201110\u201106\u202f07:59:35 | Manish\u202fNair | **\u20b9\u202f1,499.00** | Razorpay Secure Gateway | 1\u202f\u00d7\u202f*Merchant\u202fPro\u202fPlan* (SKU:\u202fPROD\u2011MERCHANT\u2011PRO) |\n| **21** | 2026\u201110\u201106\u202f07:59:29 | Ananya\u202fDeshmukh | **\u20b9\u202f4,999.00** | Razorpay Secure Gateway | 1\u202f\u00d7\u202f*Premium\u202fAnnual\u202fPlan* (SKU:\u202fPROD\u2011PREMIUM\u2011ANNUAL) |\n\n*Both orders are marked **failed** and have no payment recorded (`date_paid` is null).*\n\nIf you need more details (e.g., transaction IDs, tax breakdowns, or a broader date range), just let me know!",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "H3",
+      "name": "heldout_contextual_followup",
+      "category": "Multi-Turn Resolution",
+      "prompt": "What payment gateway was used for that order?",
+      "trials_count": 1,
+      "passed_count": 1,
+      "pass_rate": 1.0,
+      "trials": [
+        {
+          "trial_index": 1,
+          "passed": true,
+          "score": 1.0,
+          "duration_seconds": 18.17,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_get_order"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": true,
+            "direct_passed": true,
+            "derived_passed": true,
+            "missing_direct": [],
+            "derived_results": [],
+            "reasons": []
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "The order was processed using the **Razorpay Secure Gateway** payment method.",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "H4",
+      "name": "heldout_customer_name_search_boundary",
+      "category": "Entity Boundary & Search",
+      "prompt": "Show me all orders placed by John Doe.",
+      "trials_count": 1,
+      "passed_count": 1,
+      "pass_rate": 1.0,
+      "trials": [
+        {
+          "trial_index": 1,
+          "passed": true,
+          "score": 1.0,
+          "duration_seconds": 13.26,
+          "tool_trace": {
+            "passed": true,
+            "tools_called": [
+              "woo_search_orders"
+            ],
+            "reasons": []
+          },
+          "grounding": {
+            "passed": true,
+            "direct_passed": true,
+            "derived_passed": true,
+            "missing_direct": [],
+            "derived_results": [],
+            "reasons": []
+          },
+          "negative_constraints": {
+            "passed": true,
+            "forbidden_clean": true,
+            "concepts_present": true,
+            "forbidden_found": [],
+            "reasons": []
+          },
+          "final_answer": "I searched the order database for any orders that contain the name **John\u202fDoe**, but no matching orders were found. Therefore, there are currently no orders placed by John\u202fDoe in the system. If you have additional details (e.g., an order number, email address, or a different spelling), please provide them and I can look again.",
+          "error": null
+        }
+      ]
+    }
+  ]
+}
