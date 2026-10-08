@@ -62,7 +62,11 @@ WooCommerce REST API (/wp-json/wc/v3)
 
 ## 4. 5-Command Local Setup & Verification
 
-These commands install the project and verify the local codebase. The live agent demo additionally requires a reachable WooCommerce instance and credentials as described below.
+These commands install the project and verify the local codebase. For spinning up a fresh, reproducible local WordPress + WooCommerce environment on port 8085, see [dev/woocommerce/README.md](dev/woocommerce/README.md).
+
+> **Environment Configuration Note**:
+> - Copying `.env.example` to `.env` is used by the agent demo (`python -m agent_demo`) and evaluation runners, which automatically load `.env`.
+> - When running the MCP server directly (`python -m woo_connector.mcp_server`), the server reads from the active process environment. The required environment variables (`WOO_BASE_URL`, `WOO_CONSUMER_KEY`, `WOO_CONSUMER_SECRET`) must be exported in your shell or supplied via your MCP client's environment configuration (e.g., Claude Desktop or Cursor).
 
 ```bash
 # 1. Clone and install package with dev and demo dependencies
@@ -70,7 +74,7 @@ git clone https://github.com/daanyal-23/razorpay-woo-agent-studio.git
 cd razorpay-woo-agent-studio
 pip install -e ".[dev,demo]"
 
-# 2. Configure environment variables (copy .env.example)
+# 2. Configure .env for agent demo / evaluation runners
 cp .env.example .env
 
 # 3. Run unit tests (119 passed, 5 skipped without live credentials)
@@ -79,7 +83,7 @@ pytest
 # 4. Run linter and formatting check
 ruff check .
 
-# 5. Start the MCP stdio server
+# 5. Start the MCP stdio server (reads exported shell environment or MCP client config)
 python -m woo_connector.mcp_server
 ```
 
@@ -137,6 +141,7 @@ python -m agent_demo --interactive
 
 ## 8. Deep-Dive Documentation
 
+- [dev/woocommerce/README.md](dev/woocommerce/README.md) — Isolated Docker Compose environment (WordPress + MySQL on port 8085) and local setup guide.
 - [docs/merchant-scenarios.md](docs/merchant-scenarios.md) — Merchant persona, real support problems, discovery questions, rollout path, and risk mitigations.
 - [docs/capabilities.md](docs/capabilities.md) — MCP tool contracts, exact literal type definitions, PII masking rules, and verified search semantics.
 - [docs/evaluation-scenarios.md](docs/evaluation-scenarios.md) — Technical catalog of 12 primary development scenarios, held-out capability tests (H1–H7), and 401 write-rejection verification.

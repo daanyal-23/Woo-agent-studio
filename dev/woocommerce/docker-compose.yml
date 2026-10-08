@@ -1,0 +1,44 @@
+name: woo-agent-dev
+
+services:
+  db:
+    image: mysql:8.0
+    command: '--default-authentication-plugin=mysql_native_password'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-dev_root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-wordpress}
+      MYSQL_USER: ${MYSQL_USER:-wordpress}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dev_wp_password}
+    volumes:
+      - woo_agent_dev_db_data:/var/lib/mysql
+    networks:
+      - woo_agent_dev_net
+    restart: unless-stopped
+
+  wordpress:
+    image: wordpress:latest
+    depends_on:
+      - db
+    ports:
+      - "${WOO_DEV_PORT:-8085}:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${MYSQL_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-dev_wp_password}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE:-wordpress}
+      WORDPRESS_TABLE_PREFIX: wp_
+    volumes:
+      - woo_agent_dev_wp_data:/var/www/html
+    networks:
+      - woo_agent_dev_net
+    restart: unless-stopped
+
+volumes:
+  woo_agent_dev_db_data:
+    name: woo_agent_dev_db_data
+  woo_agent_dev_wp_data:
+    name: woo_agent_dev_wp_data
+
+networks:
+  woo_agent_dev_net:
+    name: woo_agent_dev_net
