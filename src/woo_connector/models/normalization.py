@@ -1,16 +1,32 @@
 """Text and PII normalization utilities for WooCommerce domain models."""
 
 import html
-import re
 
 
 def strip_html(raw_html: str | None) -> str:
-    """Safely strip HTML tags and decode HTML entities from text."""
+    """Safely strip HTML tags and decode HTML entities in linear time without regex backtracking."""
     if not raw_html:
         return ""
-    # Strip HTML tags
-    cleaned = re.sub(r"<[^>]+>", " ", raw_html)
-    # Decode HTML entities (e.g. &amp;, &quot;)
+
+    out: list[str] = []
+    i = 0
+    n = len(raw_html)
+
+    while i < n:
+        if raw_html[i] == "<":
+            close_idx = raw_html.find(">", i + 1)
+            if close_idx != -1:
+                out.append(" ")
+                i = close_idx + 1
+            else:
+                # No closing bracket in remainder of string; output rest in O(1)
+                out.append(raw_html[i:])
+                break
+        else:
+            out.append(raw_html[i])
+            i += 1
+
+    cleaned = "".join(out)
     return html.unescape(cleaned)
 
 

@@ -25,6 +25,33 @@ def test_strip_html_handles_empty_and_none() -> None:
     assert strip_html("") == ""
 
 
+def test_strip_html_malformed_unclosed_brackets_cwe_1333() -> None:
+    """CWE-1333 regression: linear-time handling of repeated unclosed brackets."""
+    # Repeated opening brackets without closing bracket
+    unclosed_many = "<" * 50000
+    assert strip_html(unclosed_many) == unclosed_many
+
+    # Mathematical / plaintext expressions with unclosed '<'
+    assert strip_html("a < b and c < d") == "a < b and c < d"
+    assert (
+        strip_html("unclosed <tag without closing bracket")
+        == "unclosed <tag without closing bracket"
+    )
+
+    # Malformed / nested opening brackets before valid tag
+    malformed_nested = "<<<p>Hello</p>"
+    assert "Hello" in strip_html(malformed_nested)
+
+    # Empty tag and unclosed trailing bracket
+    assert normalize_whitespace(strip_html("<> trailing text <")) == "trailing text <"
+
+    # Pipeline integration with clean_text and truncation
+    dirty = "<div>Important " + ("<" * 200)
+    cleaned = clean_text(dirty, max_length=20)
+    assert len(cleaned) <= 20
+    assert cleaned.startswith("Important")
+
+
 def test_normalize_whitespace() -> None:
     raw = "  Line 1   \n\n  Line 2 \t\t with   spaces   "
     assert normalize_whitespace(raw) == "Line 1 Line 2 with spaces"
